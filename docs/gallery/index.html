@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Copilot Customization Gallery</title>
+  <meta name="description" content="Browse custom skills, instructions, and agents for GitHub Copilot. A curated collection for .NET, React, and full-stack development." />
+  <meta name="color-scheme" content="dark light" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>" />
+  <style>
+    /* ====================================================================
+       Design Tokens
+       ==================================================================== */
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --shadow-card: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
+      --shadow-card-hover: 0 8px 24px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.1);
+      --transition-fast: 150ms cubic-bezier(.4,0,.2,1);
+      --transition-normal: 250ms cubic-bezier(.4,0,.2,1);
+      --focus-ring: 0 0 0 3px var(--ring);
+      --container-max: 1280px;
+    }
+
+    /* Dark (default) */
+    :root, [data-theme="dark"] {
+      --bg-page: #0d1117;
+      --bg-surface: #161b22;
+      --bg-surface-hover: #1f262e;
+      --bg-elevated: #21262d;
+      --border: #30363d;
+      --border-hover: #484f58;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --text-tertiary: #6e7681;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --accent-subtle: rgba(56,139,253,.15);
+      --ring: rgba(56,139,253,.4);
+      --green: #3fb950;
+      --green-subtle: rgba(46,160,67,.15);
+      --purple: #bc8cff;
+      --purple-subtle: rgba(163,113,247,.15);
+      --orange: #d29922;
+      --orange-subtle: rgba(187,128,9,.15);
+      --counter-bg: rgba(110,118,129,.4);
+      --hero-gradient: linear-gradient(135deg, rgba(56,139,253,.08) 0%, rgba(163,113,247,.08) 100%);
+    }
+
+    /* Light */
+    [data-theme="light"] {
+      --bg-page: #ffffff;
+      --bg-surface: #f6f8fa;
+      --bg-surface-hover: #eef1f5;
+      --bg-elevated: #ffffff;
+      --border: #d0d7de;
+      --border-hover: #afb8c1;
+      --text-primary: #1f2328;
+      --text-secondary: #656d76;
+      --text-tertiary: #8b949e;
+      --accent: #0969da;
+      --accent-hover: #0550ae;
+      --accent-subtle: rgba(9,105,218,.08);
+      --ring: rgba(9,105,218,.3);
+      --green: #1a7f37;
+      --green-subtle: rgba(26,127,55,.08);
+      --purple: #8250df;
+      --purple-subtle: rgba(130,80,223,.08);
+      --orange: #9a6700;
+      --orange-subtle: rgba(154,103,0,.08);
+      --counter-bg: rgba(175,184,193,.3);
+      --hero-gradient: linear-gradient(135deg, rgba(9,105,218,.04) 0%, rgba(130,80,223,.04) 100%);
+      --shadow-card: 0 1px 3px rgba(31,35,40,.06);
+      --shadow-card-hover: 0 6px 18px rgba(31,35,40,.1);
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) {
+        --bg-page: #ffffff;
+        --bg-surface: #f6f8fa;
+        --bg-surface-hover: #eef1f5;
+        --bg-elevated: #ffffff;
+        --border: #d0d7de;
+        --border-hover: #afb8c1;
+        --text-primary: #1f2328;
+        --text-secondary: #656d76;
+        --text-tertiary: #8b949e;
+        --accent: #0969da;
+        --accent-hover: #0550ae;
+        --accent-subtle: rgba(9,105,218,.08);
+        --ring: rgba(9,105,218,.3);
+        --green: #1a7f37;
+        --green-subtle: rgba(26,127,55,.08);
+        --purple: #8250df;
+        --purple-subtle: rgba(130,80,223,.08);
+        --orange: #9a6700;
+        --orange-subtle: rgba(154,103,0,.08);
+        --counter-bg: rgba(175,184,193,.3);
+        --hero-gradient: linear-gradient(135deg, rgba(9,105,218,.04) 0%, rgba(130,80,223,.04) 100%);
+        --shadow-card: 0 1px 3px rgba(31,35,40,.06);
+        --shadow-card-hover: 0 6px 18px rgba(31,35,40,.1);
+      }
+    }
+
+    /* ====================================================================
+       Reset & Base
+       ==================================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-page);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-hover); }
+    button { font-family: inherit; }
+    img, svg { display: block; max-width: 100%; }
+
+    /* Focus visible */
+    :focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+    :focus:not(:focus-visible) { box-shadow: none; }
+
+    /* ====================================================================
+       Skip Link
+       ==================================================================== */
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0.5rem;
+      background: var(--accent);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.875rem;
+      z-index: 100;
+      transition: left var(--transition-fast);
+    }
+    .skip-link:focus { left: 0.5rem; }
+
+    /* ====================================================================
+       Header / Hero
+       ==================================================================== */
+    .hero {
+      background: var(--hero-gradient);
+      border-bottom: 1px solid var(--border);
+      padding: 3rem 1.5rem 2.5rem;
+      text-align: center;
+    }
+    .hero__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3.5rem;
+      height: 3.5rem;
+      font-size: 2rem;
+      background: var(--accent-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: 1rem;
+    }
+    .hero__title {
+      font-size: clamp(1.5rem, 4vw, 2.25rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .hero__subtitle {
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+      font-size: clamp(0.875rem, 2vw, 1.05rem);
+      max-width: 560px;
+      margin-inline: auto;
+    }
+    .hero__stats {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .hero__stat {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .hero__stat-count {
+      font-weight: 700;
+      color: var(--text-primary);
+      background: var(--counter-bg);
+      padding: 0.1rem 0.5rem;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      min-width: 1.5rem;
+      text-align: center;
+    }
+
+    /* Hero actions (install buttons) */
+    .hero__actions {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .install-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.125rem;
+      background: var(--accent-subtle);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-md);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .install-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .install-btn svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+    .install-btn--insiders {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-subtle);
+    }
+    .install-btn--insiders:hover {
+      background: var(--green);
+      color: #fff;
+    }
+
+    /* ====================================================================
+       Toolbar (Theme toggle)
+       ==================================================================== */
+    .toolbar {
+      position: fixed;
+      top: 0.75rem;
+      right: 0.75rem;
+      z-index: 50;
+    }
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      transition: background var(--transition-fast), border-color var(--transition-fast);
+    }
+    .theme-toggle:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--border-hover);
+    }
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: inline; }
+    [data-theme="light"] .theme-toggle .icon-sun { display: inline; }
+    [data-theme="light"] .theme-toggle .icon-moon { display: none; }
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme="dark"]) .theme-toggle .icon-sun { display: inline; }
+      :root:not([data-theme="dark"]) .theme-toggle .icon-moon { display: none; }
+    }
+
+    /* ====================================================================
+       Controls (Search + Filters)
+       ==================================================================== */
+    .controls {
+      max-width: var(--container-max);
+      margin: 1.5rem auto 0;
+      padding: 0 1.5rem;
+    }
+    .search-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+    }
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-tertiary);
+      pointer-events: none;
+      width: 1rem;
+      height: 1rem;
+    }
+    .search-box {
+      width: 100%;
+      padding: 0.625rem 2.25rem 0.625rem 2.5rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .search-box::placeholder { color: var(--text-tertiary); }
+    .search-box:focus {
+      border-color: var(--accent);
+      box-shadow: var(--focus-ring);
+      outline: none;
+    }
+    .search-clear {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      background: var(--counter-bg);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+    .search-clear.visible { display: inline-flex; }
+    .search-clear:hover { background: var(--border); }
+    .search-hint {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--counter-bg);
+      padding: 0.05rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.6875rem;
+      font-family: var(--font-mono);
+      color: var(--text-tertiary);
+      pointer-events: none;
+    }
+    .search-hint.hidden { display: none; }
+
+    /* Filter chips */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.375rem 0.75rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+      min-height: 2.25rem;
+    }
+    .filter-chip:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+    }
+    .filter-chip[aria-pressed="true"] {
+      background: var(--accent-subtle);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .filter-chip__count {
+      background: var(--counter-bg);
+      padding: 0.05rem 0.4rem;
+      border-radius: 999px;
+      font-size: 0.6875rem;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      min-width: 1.25rem;
+      text-align: center;
+    }
+    .filter-chip[aria-pressed="true"] .filter-chip__count {
+      background: rgba(56,139,253,.2);
+      color: var(--accent);
+    }
+
+    /* Results count */
+    .results-info {
+      max-width: var(--container-max);
+      margin: 1rem auto 0;
+      padding: 0 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 1.5rem;
+    }
+    .results-count {
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+    }
+    .results-count strong {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    /* ====================================================================
+       Gallery Grid
+       ==================================================================== */
+    .gallery {
+      max-width: var(--container-max);
+      margin: 1rem auto 3rem;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+      gap: 1rem;
+    }
+
+    /* ====================================================================
+       Card
+       ==================================================================== */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.25rem 1rem;
+      display: flex;
+      flex-direction: column;
+      transition: border-color var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-normal);
+      box-shadow: var(--shadow-card);
+      position: relative;
+    }
+    .card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-2px);
+    }
+    .card:focus-within {
+      border-color: var(--accent);
+      box-shadow: var(--focus-ring);
+    }
+    .card__header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.625rem;
+      margin-bottom: 0.625rem;
+    }
+    .card__icon {
+      flex-shrink: 0;
+      width: 2.25rem;
+      height: 2.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      font-size: 1.1rem;
+    }
+    .card__icon--skill { background: var(--accent-subtle); color: var(--accent); }
+    .card__icon--instruction { background: var(--green-subtle); color: var(--green); }
+    .card__icon--agent { background: var(--purple-subtle); color: var(--purple); }
+    .card__title-group { min-width: 0; flex: 1; }
+    .card__title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      line-height: 1.3;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .card__badge {
+      flex-shrink: 0;
+      display: inline-block;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .card__badge--skill { background: var(--accent-subtle); color: var(--accent); }
+    .card__badge--instruction { background: var(--green-subtle); color: var(--green); }
+    .card__badge--agent { background: var(--purple-subtle); color: var(--purple); }
+
+    .card__desc {
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      line-height: 1.55;
+      flex: 1;
+      margin-bottom: 0.75rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 0.875rem;
+    }
+    .card__tag {
+      background: var(--counter-bg);
+      padding: 0.125rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.6875rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .card__footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+      gap: 0.5rem;
+    }
+    .card__path {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      color: var(--text-tertiary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .card__link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--accent);
+      transition: color var(--transition-fast), gap var(--transition-fast);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .card__link:hover { color: var(--accent-hover); gap: 0.4rem; }
+    .card__link svg { width: 0.875rem; height: 0.875rem; flex-shrink: 0; }
+
+    /* ====================================================================
+       Empty / No Results
+       ==================================================================== */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 1.5rem;
+    }
+    .empty-state__icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.6;
+    }
+    .empty-state__title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 0.375rem;
+    }
+    .empty-state__desc {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+    .empty-state__clear {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--accent-subtle);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-md);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .empty-state__clear:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* ====================================================================
+       Footer
+       ==================================================================== */
+    .site-footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      color: var(--text-tertiary);
+      font-size: 0.8125rem;
+      border-top: 1px solid var(--border);
+    }
+    .site-footer a { color: var(--text-secondary); }
+    .site-footer a:hover { color: var(--accent); }
+
+    /* ====================================================================
+       Reduced Motion
+       ==================================================================== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+
+    /* ====================================================================
+       Responsive
+       ==================================================================== */
+    @media (max-width: 640px) {
+      .hero { padding: 2rem 1rem 1.5rem; }
+      .controls, .results-info, .gallery { padding-left: 1rem; padding-right: 1rem; }
+      .gallery { gap: 0.75rem; }
+      .card { padding: 1rem; }
+      .card__desc { -webkit-line-clamp: 2; line-clamp: 2; }
+      .search-hint { display: none; }
+    }
+    @media (min-width: 1024px) {
+      .gallery { gap: 1.25rem; }
+    }
+
+    /* Print */
+    @media print {
+      .toolbar, .controls, .results-info, .skip-link, .site-footer { display: none; }
+      .gallery { display: block; }
+      .card { break-inside: avoid; margin-bottom: 1rem; box-shadow: none; border: 1px solid #ccc; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#gallery" class="skip-link">Skip to gallery</a>
+
+  <div class="toolbar">
+    <button
+      class="theme-toggle"
+      type="button"
+      aria-label="Switch to light theme"
+      id="themeToggle"
+    >
+      <span class="icon-sun" aria-hidden="true">&#9728;&#65039;</span>
+      <span class="icon-moon" aria-hidden="true">&#127769;</span>
+    </button>
+  </div>
+
+  <header class="hero" role="banner">
+    <div class="hero__icon" aria-hidden="true">&#129513;</div>
+    <h1 class="hero__title">Copilot Customization Gallery</h1>
+    <p class="hero__subtitle">
+      A curated collection of skills, instructions, and agents for GitHub Copilot
+    </p>
+    <div class="hero__stats" id="heroStats" aria-label="Gallery statistics"></div>
+    <div class="hero__actions" id="heroActions" aria-label="Install options"></div>
+  </header>
+
+  <nav class="controls" aria-label="Gallery filters">
+    <div class="search-row">
+      <div class="search-wrapper">
+        <svg class="search-icon" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Zm-.82 4.74a6 6 0 1 1 1.06-1.06l3.04 3.04a.75.75 0 1 1-1.06 1.06l-3.04-3.04Z"/>
+        </svg>
+        <input
+          type="search"
+          class="search-box"
+          id="search"
+          placeholder="Search by name, description, or tag..."
+          aria-label="Search gallery items"
+          autocomplete="off"
+        />
+        <button
+          class="search-clear"
+          id="searchClear"
+          type="button"
+          aria-label="Clear search"
+        >&times;</button>
+        <span class="search-hint" id="searchHint" aria-hidden="true">/</span>
+      </div>
+    </div>
+    <div class="filter-bar" id="filterBar" role="group" aria-label="Filter by type"></div>
+  </nav>
+
+  <div class="results-info" aria-live="polite" aria-atomic="true">
+    <span class="results-count" id="resultsCount"></span>
+  </div>
+
+  <main id="gallery" class="gallery" aria-label="Gallery items"></main>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>
+      Built for <a href="https://code.visualstudio.com/docs/copilot/copilot-customization" target="_blank" rel="noopener noreferrer">GitHub Copilot Customization</a>
+      &middot; <a href="https://github.com/congiuluc/my-awesome-copilot" target="_blank" rel="noopener noreferrer">Source</a>
+    </p>
+  </footer>
+
+  <script>
+    // =========================================================================
+    // Gallery Data
+    // =========================================================================
+    const items = [
+      // --- Skills (Backend) ---
+      { name: "Backend .NET", type: "skill", desc: "Build .NET 10 Minimal API backend with Clean Architecture, DI, Serilog logging, and API response envelope.", tags: [".NET","C#","Minimal API","Clean Architecture"], path: "skills/backend-dotnet" },
+      { name: "Repository (EF Core)", type: "skill", desc: "Data access with IRepository<T> using Entity Framework Core \u2014 SQLite, SQL Server, PostgreSQL, Cosmos DB providers.", tags: [".NET","EF Core","Cosmos DB","SQLite","SQL Server"], path: "skills/repository-efcore" },
+      { name: "Repository (Dapper)", type: "skill", desc: "Data access with IRepository<T> using Dapper \u2014 raw SQL, stored procedures, multi-mapping, bulk operations.", tags: [".NET","Dapper","SQL","Stored Procedures"], path: "skills/repository-dapper" },
+      { name: "Error Handling (Backend)", type: "skill", desc: "Global exception handlers, custom exceptions, structured error responses, Serilog context.", tags: [".NET","IExceptionHandler","Serilog"], path: "skills/error-handling-backend" },
+      { name: "Security (Backend)", type: "skill", desc: "CORS, rate limiting, input validation, secrets management, OWASP Top 10.", tags: [".NET","OWASP","FluentValidation","Security"], path: "skills/security-backend" },
+      { name: "Performance (Backend)", type: "skill", desc: "Caching, response compression, pagination, query optimization, profiling with review checklists.", tags: [".NET","Caching","EF Core","Profiling"], path: "skills/performance-backend" },
+      { name: "Testing (Backend)", type: "skill", desc: "xUnit + Moq + FluentAssertions unit and integration tests, WebApplicationFactory.", tags: [".NET","xUnit","Moq","FluentAssertions"], path: "skills/testing-backend" },
+      { name: "API Documentation", type: "skill", desc: "Swagger/OpenAPI auto-generated docs, endpoint metadata, schema annotations.", tags: [".NET","Swagger","OpenAPI"], path: "skills/api-documentation" },
+      { name: "Notification (Backend)", type: "skill", desc: "Real-time push with SignalR, domain event dispatch, notification persistence.", tags: [".NET","SignalR","Real-time","MediatR"], path: "skills/notification-backend" },
+      { name: "Aspire + OpenTelemetry", type: "skill", desc: ".NET Aspire dashboard and OpenTelemetry for local dev monitoring, tracing, metrics.", tags: [".NET","Aspire","OpenTelemetry","Observability"], path: "skills/aspire-otel" },
+      { name: "Authentication", type: "skill", desc: "JWT bearer tokens, claims-based authorization, policy-based RBAC, row-level access control.", tags: [".NET","JWT","RBAC","Authorization"], path: "skills/authentication" },
+      { name: "Logging", type: "skill", desc: "Serilog structured logging, sink configuration, enrichment, correlation IDs, sensitive data filtering.", tags: [".NET","Serilog","Logging","Observability"], path: "skills/logging" },
+
+      // --- Skills (Database) ---
+      { name: "Database (SQLite)", type: "skill", desc: "SQLite WAL mode, pragma configuration, FTS5, indexing, migrations, EF Core + Dapper setup.", tags: ["SQLite","WAL","FTS5","EF Core","Dapper"], path: "skills/database-sqlite" },
+      { name: "Database (SQL Server)", type: "skill", desc: "SQL Server connection resilience, indexing strategies, query optimization, Always Encrypted, temporal tables.", tags: ["SQL Server","Azure SQL","Indexing","Security"], path: "skills/database-sqlserver" },
+      { name: "Database (Cosmos DB)", type: "skill", desc: "Cosmos DB partition key design, RU optimization, indexing policies, change feed processor, .NET SDK.", tags: ["Cosmos DB","NoSQL","Partitioning","Change Feed"], path: "skills/database-cosmosdb" },
+      { name: "Database (MongoDB)", type: "skill", desc: "MongoDB.Driver setup, BSON mapping, aggregation pipeline, index strategies, keyset pagination.", tags: ["MongoDB","BSON","Aggregation","NoSQL"], path: "skills/database-mongodb" },
+      { name: "Database Migration", type: "skill", desc: "EF Core migrations, naming conventions, rollback strategies, data seeding, CI/CD pipeline integration.", tags: [".NET","EF Core","Migrations","Schema"], path: "skills/database-migration" },
+
+      // --- Skills (Frontend) ---
+      { name: "Frontend React", type: "skill", desc: "React 19 + Vite + TypeScript with TailwindCSS v4, feature-based structure, image preloading.", tags: ["React","TypeScript","Vite","TailwindCSS"], path: "skills/frontend-react" },
+      { name: "TailwindCSS Components", type: "skill", desc: "Button, Card, Input, Modal, Badge, Toast, Spinner, DataList with search/sort/paging.", tags: ["TailwindCSS","React","Components","DataList"], path: "skills/tailwindcss-components" },
+      { name: "Accessibility", type: "skill", desc: "WCAG 2.1 AA, semantic HTML, ARIA patterns, focus management, screen reader support.", tags: ["a11y","WCAG","ARIA","Keyboard"], path: "skills/accessibility" },
+      { name: "Responsive Design", type: "skill", desc: "Mobile-first TailwindCSS, breakpoints, responsive nav, fluid typography, touch targets.", tags: ["Responsive","Mobile-first","TailwindCSS"], path: "skills/responsive-design" },
+      { name: "Error Handling (Frontend)", type: "skill", desc: "Error boundaries, API error states, retry UI, toast notifications for errors.", tags: ["React","Error Boundary","UX"], path: "skills/error-handling-frontend" },
+      { name: "Security (Frontend)", type: "skill", desc: "XSS prevention, file upload validation, CSP, DOMPurify, safe URL construction.", tags: ["React","XSS","Security","DOMPurify"], path: "skills/security-frontend" },
+      { name: "Performance (Frontend)", type: "skill", desc: "Code splitting, lazy loading, image preloading, memoization, Web Vitals, review checklists.", tags: ["React","Lighthouse","Web Vitals","Profiling"], path: "skills/performance-frontend" },
+      { name: "Testing (Frontend)", type: "skill", desc: "Vitest + React Testing Library, user-event, accessibility assertions, MSW.", tags: ["React","Vitest","Testing Library"], path: "skills/testing-frontend" },
+      { name: "Notification (Frontend)", type: "skill", desc: "Toast system with Sonner, accessible notifications, real-time SignalR integration.", tags: ["React","Sonner","Toast","ARIA"], path: "skills/notification-frontend" },
+      { name: "State Management", type: "skill", desc: "React state with Context, TanStack Query for server state, URL state, composition patterns.", tags: ["React","TanStack Query","Context","State"], path: "skills/state-management" },
+      { name: "API Client", type: "skill", desc: "Typed fetch wrapper, error interceptors, auth headers, cancellation, retry patterns.", tags: ["React","Fetch","TypeScript","API"], path: "skills/api-client" },
+
+      // --- Skills (DevOps & Planning) ---
+      { name: "Docker", type: "skill", desc: "Multi-stage Dockerfiles, docker-compose for dev/prod, container optimization.", tags: ["Docker","Container","Multi-stage"], path: "skills/docker-containerization" },
+      { name: "CI/CD GitHub Actions", type: "skill", desc: "Build/test/deploy workflows for .NET and React, caching, environment protection.", tags: ["GitHub Actions","CI/CD","Automation"], path: "skills/cicd-github-actions" },
+      { name: "Project Management", type: "skill", desc: "Feature planning, user stories, acceptance criteria, task breakdown, sprint planning.", tags: ["Planning","User Stories","Agile"], path: "skills/project-management" },
+      { name: "Feature Testing", type: "skill", desc: "E2E Playwright tests for completeness, usability, accessibility, cross-browser.", tags: ["Playwright","E2E","a11y","Testing"], path: "skills/feature-testing" },
+      { name: "MCP Discovery", type: "skill", desc: "Find, evaluate, and install MCP servers for VS Code Copilot agent mode.", tags: ["MCP","Tools","VS Code","Copilot"], path: "skills/mcp-discovery" },
+      { name: "Version Tracking", type: "skill", desc: "Changelog management, Semantic Versioning, Conventional Commits, release workflow.", tags: ["Changelog","SemVer","Releases"], path: "skills/version-tracking" },
+      { name: "VS Code Extension", type: "skill", desc: "Build VS Code extensions: commands, tree views, webview panels, language features, testing, publishing.", tags: ["VS Code","TypeScript","Extension","Webview"], path: "skills/vscode-extension" },
+      { name: "APM (Agent Package Manager)", type: "skill", desc: "Create and manage APM projects: manifest authoring, dependencies, compilation, packaging, distribution, and supply-chain auditing.", tags: ["APM","Dependencies","AGENTS.md","Packages"], path: "skills/apm" },
+
+      // --- Instructions ---
+      { name: "Backend .NET Instructions", type: "instruction", desc: ".NET 10 Minimal API patterns, Clean Architecture, DI, middleware, Serilog.", tags: [".NET","C#"], path: "instructions/backend-dotnet.instructions.md" },
+      { name: "Frontend React Instructions", type: "instruction", desc: "React 19, Vite, TypeScript strict, TailwindCSS v4, component patterns.", tags: ["React","TypeScript"], path: "instructions/frontend-react.instructions.md" },
+      { name: "Testing Backend Instructions", type: "instruction", desc: "xUnit, Moq, FluentAssertions, integration tests with WebApplicationFactory.", tags: [".NET","Testing"], path: "instructions/testing-backend.instructions.md" },
+      { name: "Testing Frontend Instructions", type: "instruction", desc: "Vitest, React Testing Library, user-event, accessible testing patterns.", tags: ["React","Vitest"], path: "instructions/testing-frontend.instructions.md" },
+      { name: "Accessibility Instructions", type: "instruction", desc: "WCAG 2.1 AA, semantic HTML, ARIA, keyboard nav, forms, skip navigation.", tags: ["a11y","WCAG"], path: "instructions/accessibility.instructions.md" },
+      { name: "Responsive Design Instructions", type: "instruction", desc: "Mobile-first CSS, TailwindCSS breakpoints, touch targets, responsive media.", tags: ["Responsive","CSS"], path: "instructions/responsive-design.instructions.md" },
+      { name: "EF Core Repository Instructions", type: "instruction", desc: "IRepository<T> with EF Core \u2014 DbContext, LINQ, migrations, provider switching.", tags: [".NET","EF Core","Repository"], path: "instructions/repository-efcore.instructions.md" },
+      { name: "Dapper Repository Instructions", type: "instruction", desc: "IRepository<T> with Dapper \u2014 raw SQL, IDbConnectionFactory, parameterized queries.", tags: [".NET","Dapper","Repository"], path: "instructions/repository-dapper.instructions.md" },
+      { name: "API Documentation Instructions", type: "instruction", desc: "Swagger/OpenAPI setup, endpoint metadata, schema annotations.", tags: ["Swagger","OpenAPI"], path: "instructions/api-documentation.instructions.md" },
+      { name: "Docker Instructions", type: "instruction", desc: "Multi-stage builds, dev/production images, docker-compose patterns.", tags: ["Docker"], path: "instructions/docker-containerization.instructions.md" },
+      { name: "CI/CD Instructions", type: "instruction", desc: "GitHub Actions workflows, .NET + React build/test pipelines.", tags: ["GitHub Actions","CI/CD"], path: "instructions/cicd-github-actions.instructions.md" },
+      { name: "Aspire + OTel Instructions", type: "instruction", desc: "Aspire orchestration, OpenTelemetry instrumentation, OTLP exporter, health checks.", tags: [".NET","Aspire","OpenTelemetry"], path: "instructions/aspire-otel.instructions.md" },
+      { name: "Cosmos DB Instructions", type: "instruction", desc: "Partition key design, RU optimization, singleton CosmosClient, query patterns.", tags: ["Cosmos DB","NoSQL"], path: "instructions/database-cosmosdb.instructions.md" },
+      { name: "MongoDB Instructions", type: "instruction", desc: "MongoClient singleton, BSON mapping, Builders API, indexing, aggregation pipeline.", tags: ["MongoDB","NoSQL"], path: "instructions/database-mongodb.instructions.md" },
+      { name: "SQLite Instructions", type: "instruction", desc: "WAL mode, pragmas, parameterized queries, STRICT tables, migrations.", tags: ["SQLite","Database"], path: "instructions/database-sqlite.instructions.md" },
+      { name: "SQL Server Instructions", type: "instruction", desc: "Connection pooling, covering indexes, parameterized queries, Azure SQL resilience.", tags: ["SQL Server","Azure SQL"], path: "instructions/database-sqlserver.instructions.md" },
+      { name: "Error Handling Backend Instructions", type: "instruction", desc: "IExceptionHandler, custom exceptions, error envelope, structured Serilog logging.", tags: [".NET","Exceptions","Serilog"], path: "instructions/error-handling-backend.instructions.md" },
+      { name: "Error Handling Frontend Instructions", type: "instruction", desc: "Error boundaries, API error states, retry UI, user-friendly messages.", tags: ["React","Error Boundary"], path: "instructions/error-handling-frontend.instructions.md" },
+      { name: "Feature Testing Instructions", type: "instruction", desc: "Playwright E2E, axe-core accessibility, cross-browser, responsive testing.", tags: ["Playwright","E2E","a11y"], path: "instructions/feature-testing.instructions.md" },
+      { name: "Notification Backend Instructions", type: "instruction", desc: "SignalR hubs, strongly-typed clients, user/group targeting, persistence.", tags: [".NET","SignalR","Real-time"], path: "instructions/notification-backend.instructions.md" },
+      { name: "Notification Frontend Instructions", type: "instruction", desc: "Sonner toast notifications, ARIA live regions, auto-dismiss, SignalR client.", tags: ["React","Sonner","Toast"], path: "instructions/notification-frontend.instructions.md" },
+      { name: "Performance Backend Instructions", type: "instruction", desc: "Caching strategies, response compression, pagination, async/cancellation patterns.", tags: [".NET","Caching","Performance"], path: "instructions/performance-backend.instructions.md" },
+      { name: "Performance Frontend Instructions", type: "instruction", desc: "Code splitting, lazy loading, image preloading, virtualization, Core Web Vitals.", tags: ["React","Web Vitals","Performance"], path: "instructions/performance-frontend.instructions.md" },
+      { name: "Security Backend Instructions", type: "instruction", desc: "CORS, rate limiting, input validation, injection prevention, secrets management.", tags: [".NET","OWASP","Security"], path: "instructions/security-backend.instructions.md" },
+      { name: "Security Frontend Instructions", type: "instruction", desc: "XSS prevention, DOMPurify, file upload validation, CSP, safe URL construction.", tags: ["React","XSS","Security"], path: "instructions/security-frontend.instructions.md" },
+      { name: "TailwindCSS Components Instructions", type: "instruction", desc: "Component API patterns, cn() utility, design tokens, accessibility, responsiveness.", tags: ["TailwindCSS","Components"], path: "instructions/tailwindcss-components.instructions.md" },
+      { name: "Version Tracking Instructions", type: "instruction", desc: "Keep a Changelog format, Semantic Versioning, Conventional Commits mapping.", tags: ["Changelog","SemVer"], path: "instructions/version-tracking.instructions.md" },
+      { name: "Authentication Instructions", type: "instruction", desc: "JWT validation, policy-based RBAC, row-level access control, claims-based auth.", tags: [".NET","JWT","RBAC"], path: "instructions/authentication.instructions.md" },
+      { name: "Logging Instructions", type: "instruction", desc: "Serilog sinks, structured logging, correlation IDs, sensitive data filtering.", tags: [".NET","Serilog","Logging"], path: "instructions/logging.instructions.md" },
+      { name: "State Management Instructions", type: "instruction", desc: "React Context, TanStack Query, URL state, server state caching patterns.", tags: ["React","State","TanStack Query"], path: "instructions/state-management.instructions.md" },
+      { name: "API Client Instructions", type: "instruction", desc: "Typed fetch wrapper, ApiResponse envelope, error interceptors, auth headers.", tags: ["React","API","TypeScript"], path: "instructions/api-client.instructions.md" },
+      { name: "Database Migration Instructions", type: "instruction", desc: "EF Core migrations, naming conventions, rollback strategies, data seeding.", tags: [".NET","EF Core","Migrations"], path: "instructions/database-migration.instructions.md" },
+      { name: "Project Management Instructions", type: "instruction", desc: "User story format, acceptance criteria, task breakdown, estimation.", tags: ["Planning","Stories","Agile"], path: "instructions/project-management.instructions.md" },
+      { name: "MCP Discovery Instructions", type: "instruction", desc: "MCP server discovery, evaluation, installation, security, VS Code configuration.", tags: ["MCP","VS Code","Tools"], path: "instructions/mcp-discovery.instructions.md" },
+      { name: "VS Code Extension Instructions", type: "instruction", desc: "Extension anatomy, commands, webview CSP, tree views, esbuild bundling, publishing.", tags: ["VS Code","TypeScript","Extension"], path: "instructions/vscode-extension.instructions.md" },
+      { name: "APM Instructions", type: "instruction", desc: "Manifest schema, dependency syntax, lock file conventions, compilation config, security auditing.", tags: ["APM","apm.yml","Dependencies"], path: "instructions/apm.instructions.md" },
+
+      // --- Agents ---
+      { name: "Tech Lead", type: "agent", desc: "Orchestrate full-stack feature delivery by delegating to specialized agents. Coordinates planning, implementation, testing, and review.", tags: ["Orchestrator","Full-stack","Delegation"], path: "agents/tech-lead.agent.md" },
+      { name: "Backend Creator", type: "agent", desc: "Build .NET 10 Minimal API features: endpoints, services, middleware, repositories following Clean Architecture.", tags: [".NET","Backend","Clean Architecture"], path: "agents/backend-creator.agent.md" },
+      { name: "Frontend Creator", type: "agent", desc: "Build React 19 + TypeScript features: components, pages, hooks, services with TailwindCSS and image preloading.", tags: ["React","Frontend","TailwindCSS"], path: "agents/frontend-creator.agent.md" },
+      { name: "Test Writer", type: "agent", desc: "Write comprehensive tests: xUnit for .NET, Vitest for React, Playwright for E2E. Covers unit, integration, and accessibility.", tags: ["Testing","xUnit","Vitest","Playwright"], path: "agents/test-writer.agent.md" },
+      { name: "Backend Reviewer", type: "agent", desc: "Read-only code review of .NET backend: architecture, security (OWASP), performance, error handling, API documentation.", tags: [".NET","Review","Security","Performance"], path: "agents/backend-reviewer.agent.md" },
+      { name: "Frontend Reviewer", type: "agent", desc: "Read-only code review of React frontend: accessibility (WCAG), responsiveness, performance, security, code quality.", tags: ["React","Review","a11y","Performance"], path: "agents/frontend-reviewer.agent.md" },
+      { name: "Feature Planner", type: "agent", desc: "Plan features, write user stories, define acceptance criteria, break work into tasks with complexity estimates.", tags: ["Planning","User Stories","Agile"], path: "agents/feature-planner.agent.md" },
+      { name: "DevOps", type: "agent", desc: "Configure Docker, CI/CD pipelines, GitHub Actions workflows, Aspire orchestration, and deployment infrastructure.", tags: ["Docker","CI/CD","GitHub Actions","Aspire"], path: "agents/devops.agent.md" },
+      { name: "Release Manager", type: "agent", desc: "Manage releases: update changelogs, bump versions following SemVer, validate release readiness, tag releases.", tags: ["Changelog","SemVer","Releases"], path: "agents/release-manager.agent.md" },
+      { name: "VS Code Extension Creator", type: "agent", desc: "Build VS Code extensions: commands, tree views, webview panels, language features, testing, and publishing.", tags: ["VS Code","TypeScript","Extension","Webview"], path: "agents/vscode-extension-creator.agent.md" },
+    ];
+
+    // =========================================================================
+    // State
+    // =========================================================================
+    let activeFilter = "all";
+
+    // =========================================================================
+    // DOM
+    // =========================================================================
+    const gallery     = document.getElementById("gallery");
+    const searchInput = document.getElementById("search");
+    const searchClear = document.getElementById("searchClear");
+    const searchHint  = document.getElementById("searchHint");
+    const filterBar   = document.getElementById("filterBar");
+    const resultsInfo = document.getElementById("resultsCount");
+    const heroStats   = document.getElementById("heroStats");
+    const heroActions = document.getElementById("heroActions");
+    const themeToggle = document.getElementById("themeToggle");
+
+    // =========================================================================
+    // Theme
+    // =========================================================================
+    function getStoredTheme() {
+      try { return localStorage.getItem("gallery-theme"); } catch { return null; }
+    }
+    function setTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      try { localStorage.setItem("gallery-theme", theme); } catch {}
+      themeToggle.setAttribute("aria-label",
+        theme === "dark" ? "Switch to light theme" : "Switch to dark theme");
+    }
+    themeToggle.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme") ||
+        (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+      setTheme(current === "dark" ? "light" : "dark");
+    });
+    const stored = getStoredTheme();
+    if (stored) setTheme(stored);
+
+    // =========================================================================
+    // Hero Stats
+    // =========================================================================
+    function renderStats() {
+      const counts = { skill: 0, instruction: 0, agent: 0 };
+      items.forEach(i => { if (counts[i.type] !== undefined) counts[i.type]++; });
+      const labels = { skill: "Skills", instruction: "Instructions", agent: "Agents" };
+      heroStats.innerHTML = Object.entries(counts).map(([type, count]) =>
+        `<span class="hero__stat">
+          <span class="hero__stat-count">${count}</span> ${labels[type]}
+        </span>`
+      ).join("");
+    }
+    renderStats();
+
+    // =========================================================================
+    // Install Buttons
+    // =========================================================================
+    function renderInstallButtons() {
+      const cloneUrl = `${repoBase}.git`;
+      const codeIcon = `<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 11.5 1.5 8 5 4.5"/><polyline points="11 4.5 14.5 8 11 11.5"/></svg>`;
+      heroActions.innerHTML = `
+        <a class="install-btn"
+           href="vscode://vscode.git/clone?url=${encodeURIComponent(cloneUrl)}"
+           aria-label="Clone and open repository in Visual Studio Code">
+          ${codeIcon} Open in VS Code
+        </a>
+        <a class="install-btn install-btn--insiders"
+           href="vscode-insiders://vscode.git/clone?url=${encodeURIComponent(cloneUrl)}"
+           aria-label="Clone and open repository in Visual Studio Code Insiders">
+          ${codeIcon} Open in VS Code Insiders
+        </a>`;
+    }
+    renderInstallButtons();
+
+    // =========================================================================
+    // Filter Chips
+    // =========================================================================
+    function renderFilters() {
+      const types = ["all", "skill", "instruction", "agent"];
+      const labels = { all: "All", skill: "Skills", instruction: "Instructions", agent: "Agents" };
+      const counts = { all: items.length, skill: 0, instruction: 0, agent: 0 };
+      items.forEach(i => { if (counts[i.type] !== undefined) counts[i.type]++; });
+
+      filterBar.innerHTML = types.map(t =>
+        `<button
+          class="filter-chip"
+          type="button"
+          data-filter="${t}"
+          aria-pressed="${t === activeFilter}"
+          aria-label="Show ${labels[t]}"
+        >
+          ${labels[t]}
+          <span class="filter-chip__count" aria-hidden="true">${counts[t]}</span>
+        </button>`
+      ).join("");
+
+      filterBar.querySelectorAll(".filter-chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeFilter = btn.dataset.filter;
+          filterBar.querySelectorAll(".filter-chip").forEach(b =>
+            b.setAttribute("aria-pressed", b.dataset.filter === activeFilter)
+          );
+          applyFilters();
+        });
+      });
+    }
+    renderFilters();
+
+    // =========================================================================
+    // GitHub URL Helper
+    // =========================================================================
+    function getRepoBase() {
+      const host = window.location.hostname;
+      const path = window.location.pathname.split("/").filter(Boolean);
+      if (host.endsWith(".github.io") && path.length > 0) {
+        const user = host.replace(".github.io", "");
+        return `https://github.com/${encodeURIComponent(user)}/${encodeURIComponent(path[0])}`;
+      }
+      return "https://github.com/congiuluc/my-awesome-copilot";
+    }
+    const repoBase = getRepoBase();
+
+    // =========================================================================
+    // Card Icons
+    // =========================================================================
+    const typeIcons = {
+      skill:       "\uD83E\uDDE9",
+      instruction: "\uD83D\uDCCB",
+      agent:       "\uD83E\uDD16"
+    };
+    const linkLabels = {
+      skill:       "Browse skill",
+      instruction: "View file",
+      agent:       "View agent"
+    };
+
+    // =========================================================================
+    // Rendering
+    // =========================================================================
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function renderCards(data) {
+      if (data.length === 0) {
+        gallery.innerHTML = `
+          <div class="empty-state" role="status">
+            <div class="empty-state__icon" aria-hidden="true">&#128269;</div>
+            <h2 class="empty-state__title">No results found</h2>
+            <p class="empty-state__desc">Try a different search term or filter.</p>
+            <button class="empty-state__clear" type="button" id="emptyReset">Clear filters</button>
+          </div>`;
+        document.getElementById("emptyReset")?.addEventListener("click", resetFilters);
+        return;
+      }
+      gallery.innerHTML = data.map(item => {
+        const icon = typeIcons[item.type] || "\u2753";
+        const tags = item.tags.map(t =>
+          `<span class="card__tag">${escapeHtml(t)}</span>`
+        ).join("");
+        const label = linkLabels[item.type] || "View";
+        const ref = item.path.endsWith('.md') ? 'blob' : 'tree';
+        const href = `${repoBase}/${ref}/main/${encodeURI(item.path)}`;
+        return `
+          <article class="card" data-type="${escapeHtml(item.type)}">
+            <div class="card__header">
+              <div class="card__icon card__icon--${escapeHtml(item.type)}" aria-hidden="true">${icon}</div>
+              <div class="card__title-group">
+                <h2 class="card__title">
+                  ${escapeHtml(item.name)}
+                  <span class="card__badge card__badge--${escapeHtml(item.type)}">${escapeHtml(item.type)}</span>
+                </h2>
+              </div>
+            </div>
+            <p class="card__desc">${escapeHtml(item.desc)}</p>
+            <div class="card__tags">${tags}</div>
+            <div class="card__footer">
+              <span class="card__path" title="${escapeHtml(item.path)}">${escapeHtml(item.path)}</span>
+              <a class="card__link"
+                 href="${href}"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="${escapeHtml(label)} ${escapeHtml(item.name)}">
+                ${escapeHtml(label)}
+                <svg aria-hidden="true" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"/>
+                </svg>
+              </a>
+            </div>
+          </article>`;
+      }).join("");
+    }
+
+    function resetFilters() {
+      searchInput.value = "";
+      searchClear.classList.remove("visible");
+      searchHint.classList.remove("hidden");
+      activeFilter = "all";
+      filterBar.querySelectorAll(".filter-chip").forEach(b =>
+        b.setAttribute("aria-pressed", b.dataset.filter === "all")
+      );
+      applyFilters();
+      searchInput.focus();
+    }
+
+    function applyFilters() {
+      const query = searchInput.value.toLowerCase().trim();
+      const hasQuery = query.length > 0;
+      searchClear.classList.toggle("visible", hasQuery);
+      searchHint.classList.toggle("hidden", hasQuery);
+
+      const filtered = items.filter(item => {
+        const matchesFilter = activeFilter === "all" || item.type === activeFilter;
+        if (!matchesFilter) return false;
+        if (!query) return true;
+        return (
+          item.name.toLowerCase().includes(query) ||
+          item.desc.toLowerCase().includes(query) ||
+          item.tags.some(t => t.toLowerCase().includes(query))
+        );
+      });
+
+      renderCards(filtered);
+
+      if (hasQuery || activeFilter !== "all") {
+        resultsInfo.innerHTML = `Showing <strong>${filtered.length}</strong> of ${items.length} items`;
+      } else {
+        resultsInfo.innerHTML = "";
+      }
+    }
+
+    // =========================================================================
+    // Event Listeners
+    // =========================================================================
+    searchInput.addEventListener("input", applyFilters);
+    searchClear.addEventListener("click", () => {
+      searchInput.value = "";
+      searchClear.classList.remove("visible");
+      searchHint.classList.remove("hidden");
+      applyFilters();
+      searchInput.focus();
+    });
+
+    // Keyboard shortcut: "/" to focus search
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "/" && document.activeElement !== searchInput
+          && !e.ctrlKey && !e.metaKey && !e.altKey
+          && document.activeElement?.tagName !== "INPUT"
+          && document.activeElement?.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        searchInput.focus();
+      }
+      if (e.key === "Escape" && document.activeElement === searchInput) {
+        searchInput.blur();
+      }
+    });
+
+    // =========================================================================
+    // Initial Render
+    // =========================================================================
+    renderCards(items);
+  </script>
+</body>
+</html>

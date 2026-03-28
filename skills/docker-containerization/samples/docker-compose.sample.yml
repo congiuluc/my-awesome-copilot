@@ -1,0 +1,42 @@
+# Sample: Docker Compose for local development
+# Replace {App} and {frontend-app} with actual project names
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: src/{App}.Api/Dockerfile.dev
+    ports:
+      - "5000:8080"
+    volumes:
+      - ./src:/src
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - DatabaseProvider=Sqlite
+      - ConnectionStrings__DefaultConnection=Data Source=/data/myapp.db
+    volumes:
+      - sqlite-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  web:
+    build:
+      context: .
+      dockerfile: src/{frontend-app}/Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./src/{frontend-app}/src:/app/src
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  sqlite-data:
