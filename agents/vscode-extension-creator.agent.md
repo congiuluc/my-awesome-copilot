@@ -12,6 +12,7 @@ Always load and follow these skills before writing code:
 - `security-frontend` — CSP for webviews, no eval(), nonce-based scripts
 - `testing-frontend` — Vitest for unit tests
 - `version-tracking` — Changelog and SemVer management
+- `gitignore` — .gitignore generation for VS Code extension projects (when scaffolding)
 
 ## Project Structure
 

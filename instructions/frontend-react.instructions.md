@@ -1,6 +1,6 @@
 ---
 description: "Use when writing, modifying, or reviewing React TypeScript frontend code. Covers Vite, React 19, TailwindCSS v4, responsive design, component patterns, and state management."
-applyTo: "src/web-app/**"
+applyTo: "src/web-app/src/features/**,src/web-app/src/components/**,src/web-app/src/hooks/**,src/web-app/src/services/**,src/web-app/src/types/**,src/web-app/src/pages/**,src/web-app/src/routes/**,src/web-app/vite.config.*"
 ---
 # Frontend React TypeScript Guidelines
 

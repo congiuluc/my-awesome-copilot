@@ -1,0 +1,192 @@
+name: Validate Copilot Config
+
+on:
+  pull_request:
+    paths:
+      - 'agents/**'
+      - 'skills/**'
+      - 'instructions/**'
+      - 'prompts/**'
+      - 'copilot-instructions.md'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate YAML frontmatter in agents
+        run: |
+          echo "=== Validating agent frontmatter ==="
+          errors=0
+          for file in agents/*.agent.md; do
+            [ -f "$file" ] || continue
+            # Check file starts with ---
+            if ! head -1 "$file" | grep -q '^---$'; then
+              echo "❌ $file: Missing YAML frontmatter opener (---)"
+              errors=$((errors + 1))
+              continue
+            fi
+            # Check frontmatter has closing ---
+            if ! awk 'NR>1' "$file" | grep -q '^---$'; then
+              echo "❌ $file: Missing YAML frontmatter closer (---)"
+              errors=$((errors + 1))
+              continue
+            fi
+            # Check description field exists
+            if ! sed -n '2,/^---$/p' "$file" | grep -q '^description:'; then
+              echo "❌ $file: Missing 'description' in frontmatter"
+              errors=$((errors + 1))
+            fi
+            echo "✅ $file"
+          done
+          if [ $errors -gt 0 ]; then
+            echo "::error::$errors agent(s) have frontmatter issues"
+            exit 1
+          fi
+
+      - name: Validate YAML frontmatter in instructions
+        run: |
+          echo "=== Validating instruction frontmatter ==="
+          errors=0
+          for file in instructions/*.instructions.md; do
+            [ -f "$file" ] || continue
+            if ! head -1 "$file" | grep -q '^---$'; then
+              echo "❌ $file: Missing YAML frontmatter opener"
+              errors=$((errors + 1))
+              continue
+            fi
+            if ! awk 'NR>1' "$file" | grep -q '^---$'; then
+              echo "❌ $file: Missing YAML frontmatter closer"
+              errors=$((errors + 1))
+              continue
+            fi
+            # Check description and applyTo
+            frontmatter=$(sed -n '2,/^---$/p' "$file")
+            if ! echo "$frontmatter" | grep -q '^description:'; then
+              echo "❌ $file: Missing 'description' in frontmatter"
+              errors=$((errors + 1))
+            fi
+            if ! echo "$frontmatter" | grep -q '^applyTo:'; then
+              echo "❌ $file: Missing 'applyTo' in frontmatter"
+              errors=$((errors + 1))
+            fi
+            echo "✅ $file"
+          done
+          if [ $errors -gt 0 ]; then
+            echo "::error::$errors instruction(s) have frontmatter issues"
+            exit 1
+          fi
+
+      - name: Validate YAML frontmatter in skills
+        run: |
+          echo "=== Validating skill frontmatter ==="
+          errors=0
+          for file in skills/*/SKILL.md; do
+            [ -f "$file" ] || continue
+            if ! head -1 "$file" | grep -q '^---$'; then
+              echo "❌ $file: Missing YAML frontmatter opener"
+              errors=$((errors + 1))
+              continue
+            fi
+            if ! awk 'NR>1' "$file" | grep -q '^---$'; then
+              echo "❌ $file: Missing YAML frontmatter closer"
+              errors=$((errors + 1))
+              continue
+            fi
+            frontmatter=$(sed -n '2,/^---$/p' "$file")
+            if ! echo "$frontmatter" | grep -q '^name:'; then
+              echo "❌ $file: Missing 'name' in frontmatter"
+              errors=$((errors + 1))
+            fi
+            if ! echo "$frontmatter" | grep -q '^description:'; then
+              echo "❌ $file: Missing 'description' in frontmatter"
+              errors=$((errors + 1))
+            fi
+            echo "✅ $file"
+          done
+          if [ $errors -gt 0 ]; then
+            echo "::error::$errors skill(s) have frontmatter issues"
+            exit 1
+          fi
+
+      - name: Validate YAML frontmatter in prompts
+        run: |
+          echo "=== Validating prompt frontmatter ==="
+          errors=0
+          for file in prompts/*.prompt.md; do
+            [ -f "$file" ] || continue
+            if ! head -1 "$file" | grep -q '^---$'; then
+              echo "❌ $file: Missing YAML frontmatter opener"
+              errors=$((errors + 1))
+              continue
+            fi
+            if ! awk 'NR>1' "$file" | grep -q '^---$'; then
+              echo "❌ $file: Missing YAML frontmatter closer"
+              errors=$((errors + 1))
+              continue
+            fi
+            frontmatter=$(sed -n '2,/^---$/p' "$file")
+            if ! echo "$frontmatter" | grep -q '^description:'; then
+              echo "❌ $file: Missing 'description' in frontmatter"
+              errors=$((errors + 1))
+            fi
+            echo "✅ $file"
+          done
+          if [ $errors -gt 0 ]; then
+            echo "::error::$errors prompt(s) have frontmatter issues"
+            exit 1
+          fi
+
+      - name: Check agent cross-references
+        run: |
+          echo "=== Checking agent cross-references ==="
+          errors=0
+          for file in agents/*.agent.md; do
+            [ -f "$file" ] || continue
+            # Extract agents: list from frontmatter
+            agents_line=$(sed -n '2,/^---$/p' "$file" | grep '^agents:' | sed 's/agents: *\[//;s/\]//;s/,/ /g')
+            for ref in $agents_line; do
+              ref=$(echo "$ref" | tr -d ' "'"'"'')
+              [ -z "$ref" ] && continue
+              if [ ! -f "agents/${ref}.agent.md" ]; then
+                echo "❌ $file references agent '${ref}' but agents/${ref}.agent.md does not exist"
+                errors=$((errors + 1))
+              fi
+            done
+          done
+          if [ $errors -gt 0 ]; then
+            echo "::error::$errors broken agent cross-reference(s) found"
+            exit 1
+          fi
+          echo "✅ All agent cross-references valid"
+
+      - name: Check for duplicate applyTo patterns
+        run: |
+          echo "=== Checking for applyTo pattern overlaps ==="
+          # Extract all applyTo patterns and check for exact duplicates
+          patterns=""
+          for file in instructions/*.instructions.md; do
+            [ -f "$file" ] || continue
+            apply_to=$(sed -n '2,/^---$/p' "$file" | grep '^applyTo:' | sed 's/applyTo: *"//;s/"$//')
+            if [ -n "$apply_to" ]; then
+              IFS=',' read -ra parts <<< "$apply_to"
+              for part in "${parts[@]}"; do
+                part=$(echo "$part" | xargs)
+                if echo "$patterns" | grep -qF "|${part}|"; then
+                  echo "⚠️  Duplicate applyTo pattern '${part}' in $file"
+                fi
+                patterns="${patterns}|${part}|${file} "
+              done
+            fi
+          done
+          echo "✅ applyTo pattern check complete"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "=== Configuration Summary ==="
+          echo "Agents:       $(find agents -name '*.agent.md' 2>/dev/null | wc -l)"
+          echo "Skills:       $(find skills -name 'SKILL.md' 2>/dev/null | wc -l)"
+          echo "Instructions: $(find instructions -name '*.instructions.md' 2>/dev/null | wc -l)"
+          echo "Prompts:      $(find prompts -name '*.prompt.md' 2>/dev/null | wc -l)"

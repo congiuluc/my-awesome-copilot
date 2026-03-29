@@ -27,7 +27,7 @@ Also reference for context:
 - Add a fresh empty `[Unreleased]` section
 
 ### 3. Validate Release Readiness
-- [ ] All tests passing (`dotnet test` + `npm test`)
+- [ ] All tests passing (detect and run: `dotnet test`, `mvn test` / `gradle test`, `pytest`, `npm test`)
 - [ ] No critical security vulnerabilities
 - [ ] Changelog has all notable changes documented
 - [ ] Version number follows SemVer correctly

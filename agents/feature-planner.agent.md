@@ -11,8 +11,11 @@ Always load and follow:
 - `version-tracking` — Changelog categories for classifying changes
 
 Also reference as needed for technical feasibility:
-- `backend-dotnet` — Understand backend architecture for task scoping
+- `backend-dotnet` — Understand .NET/C# backend architecture for task scoping
+- `backend-java` — Understand Java/Spring Boot backend architecture for task scoping
+- `backend-python` — Understand Python/FastAPI backend architecture for task scoping
 - `frontend-react` — Understand frontend structure for task scoping
+- `frontend-angular` — Understand Angular frontend structure for task scoping
 
 ## Planning Workflow
 
@@ -50,8 +53,12 @@ Also reference as needed for technical feasibility:
 
 - Each task should be completable in < 4 hours
 - Tasks should specify the layer: `[Backend]`, `[Frontend]`, `[Test]`, `[DevOps]`
+- For backend tasks, specify the language/framework: `[Backend-C#]`, `[Backend-Java]`, `[Backend-Python]`
+- For frontend tasks, specify the framework: `[Frontend-React]`, `[Frontend-Angular]`
 - Include file paths where work will happen when possible
 - Flag tasks that need design decisions
+- Identify the target backend language early — check for `.csproj`, `pom.xml`/`build.gradle`, or `pyproject.toml`/`requirements.txt`
+- Identify the target frontend framework early — check for `vite.config.ts` + `react` (React) or `angular.json` (Angular)
 
 ## Constraints
 
@@ -83,9 +90,9 @@ Also reference as needed for technical feasibility:
 {Each task specifies: layer tag, description, complexity (S/M/L), agent}
 
 ## Implementation Order
-1. {First task — agent: backend-creator}
-2. {Second task — agent: frontend-creator}
-3. {Third task — agent: test-writer}
+1. {First task — agent: backend-creator-csharp / backend-creator-java / backend-creator-python}
+2. {Second task — agent: frontend-creator-react / frontend-creator-angular}
+3. {Third task — agent: test-writer-csharp / test-writer-java / test-writer-python / test-writer-react / test-writer-angular}
 ...
 
 ## Technical Decisions
