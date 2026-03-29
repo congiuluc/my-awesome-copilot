@@ -1,0 +1,102 @@
+targetScope = 'subscription'
+
+// ---------------------------------------------------------------------------
+// Parameters
+// ---------------------------------------------------------------------------
+@minLength(1)
+@maxLength(64)
+@description('Name of the environment (used for resource naming)')
+param environmentName string
+
+@minLength(1)
+@description('Primary location for all resources')
+param location string
+
+// ---------------------------------------------------------------------------
+// Variables
+// ---------------------------------------------------------------------------
+var tags = { 'azd-env-name': environmentName }
+var resourceSuffix = take(uniqueString(subscription().id, environmentName, location), 6)
+
+// ---------------------------------------------------------------------------
+// Resource Group
+// ---------------------------------------------------------------------------
+resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
+  name: 'rg-${environmentName}'
+  location: location
+  tags: tags
+}
+
+// ---------------------------------------------------------------------------
+// Modules
+// ---------------------------------------------------------------------------
+
+module monitoring './modules/monitoring.bicep' = {
+  name: 'monitoring'
+  scope: rg
+  params: {
+    location: location
+    tags: tags
+    resourceSuffix: resourceSuffix
+  }
+}
+
+module keyVault './modules/keyvault.bicep' = {
+  name: 'keyvault'
+  scope: rg
+  params: {
+    location: location
+    tags: tags
+    resourceSuffix: resourceSuffix
+  }
+}
+
+module containerAppsEnv './modules/container-apps-env.bicep' = {
+  name: 'containerAppsEnv'
+  scope: rg
+  params: {
+    location: location
+    tags: tags
+    resourceSuffix: resourceSuffix
+    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
+  }
+}
+
+module registry './modules/container-registry.bicep' = {
+  name: 'registry'
+  scope: rg
+  params: {
+    location: location
+    tags: tags
+    resourceSuffix: resourceSuffix
+  }
+}
+
+module api './modules/container-app.bicep' = {
+  name: 'api'
+  scope: rg
+  params: {
+    name: 'api'
+    location: location
+    tags: tags
+    containerAppsEnvironmentId: containerAppsEnv.outputs.id
+    containerRegistryName: registry.outputs.name
+    imageName: 'api'
+    targetPort: 8080
+    env: [
+      {
+        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+        value: monitoring.outputs.appInsightsConnectionString
+      }
+    ]
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Outputs — UPPERCASE names become azd env vars
+// ---------------------------------------------------------------------------
+output AZURE_RESOURCE_GROUP string = rg.name
+output AZURE_CONTAINER_REGISTRY_ENDPOINT string = registry.outputs.loginServer
+output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
+output AZURE_LOG_ANALYTICS_WORKSPACE_ID string = monitoring.outputs.logAnalyticsWorkspaceId
+output API_URL string = api.outputs.url

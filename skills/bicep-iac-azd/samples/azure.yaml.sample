@@ -1,0 +1,28 @@
+# Sample azure.yaml — Full-Stack App (API + Web)
+#
+# This configuration deploys:
+# - A .NET API on Azure Container Apps
+# - A React frontend on Azure Static Web Apps
+#
+# Usage:
+#   azd auth login
+#   azd init
+#   azd up
+
+name: myapp
+metadata:
+  template: azd-init
+
+services:
+  api:
+    project: ./src/api
+    language: dotnet
+    host: containerapp
+    docker:
+      path: ./src/api/Dockerfile
+
+  web:
+    project: ./src/web
+    language: js
+    host: staticwebapp
+    dist: dist

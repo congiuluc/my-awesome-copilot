@@ -1,0 +1,71 @@
+# .NET + React Full-Stack .gitignore
+# ====================================
+
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+bld/
+[Ll]og/
+[Ll]ogs/
+
+# NuGet
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+
+# Visual Studio
+.vs/
+*.rsuser
+*.suo
+*.cache
+*.dbmdl
+[Tt]est[Rr]esult*/
+[Dd]ebugPublic/
+[Rr]eleases/
+BenchmarkDotNet.Artifacts/
+PublishProfiles/
+launchSettings.json
+
+## Node.js / React
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.eslintcache
+
+## IDE
+.idea/
+.vscode/settings.json
+.vscode/launch.json
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+## Environment
+.env
+.env.*
+!.env.example
+
+## Docker
+docker-compose.override.yml
+
+## Misc
+*.log
+*.tmp
+*.bak

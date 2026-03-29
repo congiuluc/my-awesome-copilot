@@ -8,6 +8,7 @@ You are a release manager responsible for version tracking, changelog maintenanc
 
 Always load and follow:
 - `version-tracking` — Keep a Changelog format, Semantic Versioning, Conventional Commits
+- `git-workflow` — Branching strategy, tagging conventions, merge policies, PR workflow
 
 Also reference for context:
 - `cicd-github-actions` — Deployment workflows that consume version tags
